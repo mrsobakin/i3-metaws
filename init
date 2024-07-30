@@ -1,0 +1,4 @@
+#!/bin/sh
+
+SOCKET="$("$(dirname "$0")/socket")"
+echo "$1" > "$SOCKET"

@@ -1,0 +1,3 @@
+#!/bin/sh
+
+i3 --get-socketpath | sed 's/\(.*\)\/\(.*\)\./\1\/metaws-current./'

@@ -1,0 +1,22 @@
+#!/bin/sh
+
+SOCKET="$("$(dirname "$0")/socket")"
+
+workspaces() {
+    read -r CURRENT < "$SOCKET"
+    i3-msg -t get_workspaces | jq --arg ws "$CURRENT" '[., $ws]' --unbuffered -c
+}
+
+i3-msg -t subscribe -m '["workspace", "output"]' | {
+    workspaces
+    while read -r _event; do workspaces; done;
+} | jq \
+    -L "$(dirname "$0")" \
+    --unbuffered \
+    -c \
+'
+    include "lib";
+
+    [{id: -1, name: .[1]}]
+    + [ .[0].[] | .name |= parse_metaws | select(.name.current) | .name |= .name ]
+'

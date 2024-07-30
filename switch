@@ -1,0 +1,35 @@
+#!/bin/sh
+
+SOCKET="$("$(dirname "$0")/socket")"
+read -r CURRENT < "$SOCKET"
+
+if [ "$CURRENT" = "$1" ]; then
+    exit 0
+fi
+
+echo "$1" > "$SOCKET"
+
+i3-msg "$(i3-msg -t get_workspaces | jq -r \
+    -L "$(dirname "$0")" \
+    --arg from "$CURRENT" \
+    --arg to "$1" \
+'
+    include "lib";
+
+    [(.[] | .metaws = (.name | parse_metaws))]
+        | [
+            .[].metaws
+            | select(.pin | not)
+            | if .current then
+                  [.name, make_name(.name; $from)]
+              elif .metaws == $to then
+                  [.true_name, .name]
+              else
+                  empty
+              end
+            | i3_rename(.[0]; .[1])
+          ] + [
+            .[] | select(.visible) | "workspace \"\( .name | escape )\""
+          ]
+        | join(";")
+')"
