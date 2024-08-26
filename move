@@ -13,5 +13,10 @@ i3-msg "$(i3-msg -t get_workspaces | jq -r \
 '
     include "lib";
 
-    "move container to workspace \"\(make_name(.[] | select(.focused).name | parse_metaws | .name; $to) | escape)\""
+    .[] | select(.focused).name | parse_metaws | if .pin then
+        ""
+    else
+        "move container to workspace \"\(make_name(.name; $to) | escape)\""
+    end
+
 ')"
